@@ -1,0 +1,9 @@
+streamlit
+pandas
+groq
+pytesseract
+pillow
+speech_recognition
+psycopg2-binary
+reportlab
+matplotlib
