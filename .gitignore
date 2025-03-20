@@ -1,0 +1,59 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+*.egg-info/
+dist/
+build/
+
+# Environment variables
+.env
+*.env
+
+# Database files
+*.db
+*.sql
+*.sqlite3
+
+# Logs
+*.log
+
+# Dependency management
+pip-log.txt
+Pipfile.lock
+
+# Virtual environment
+ENV/
+.venv/
+
+# IDE and editor files
+.idea/
+*.sublime-project
+*.sublime-workspace
+.vscode/
+*.code-workspace
+
+# Operating system files
+.DS_Store
+Thumbs.db
+
+# Streamlit-specific
+.streamlit/secrets.toml
+*.streamlit
+
+# Temporary files
+*.bak
+*.tmp
+*.swp
+
+# Generated files
+*.csv  # Exclude exported CSVs unless you want to version them
+*.pdf  # Exclude generated PDF reports
+
+# Miscellaneous
+*.cache
+*.pytest_cache/
