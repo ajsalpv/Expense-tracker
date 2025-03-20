@@ -3,7 +3,7 @@ pandas
 groq
 pytesseract
 pillow
-speech_recognition
+speechrecognition
 psycopg2-binary
 reportlab
 matplotlib
