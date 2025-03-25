@@ -13,7 +13,7 @@ import io
 import matplotlib.pyplot as plt
 import os
 from dotenv import load_dotenv
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, text
 import urllib.parse
 
 # Load environment variables from .env file
@@ -22,10 +22,8 @@ load_dotenv()
 # Initialize Groq client using environment variable
 client = Groq(api_key=os.getenv("GROQ_API_KEY"))
 
-# Database connection using SQLAlchemy
-@st.cache_resource
+# Database connection function (no caching)
 def get_db_connection():
-    # URL-encode the password to handle special characters like '@'
     encoded_password = urllib.parse.quote(os.getenv("DB_PASSWORD"))
     conn_string = f"postgresql://{os.getenv('DB_USER')}:{encoded_password}@{os.getenv('DB_HOST')}:{os.getenv('DB_PORT')}/{os.getenv('DB_NAME')}"
     engine = create_engine(conn_string)
@@ -71,20 +69,17 @@ def parse_receipt_image(image):
 
 # Load and save data with SQLAlchemy
 def load_data():
-    conn = get_db_connection()
-    df = pd.read_sql("SELECT * FROM expenses", conn)
-    conn.close()
+    with get_db_connection() as conn:
+        df = pd.read_sql("SELECT * FROM expenses", conn)
     return df
 
 def save_data(date, amount, category, desc, tags):
-    conn = get_db_connection()
-    with conn.connection.cursor() as cur:  # Use raw psycopg2 cursor for execute
-        cur.execute(
-            "INSERT INTO expenses (date, amount, category, description, tags) VALUES (%s, %s, %s, %s, %s)",
-            (date, amount, category, desc, tags)
+    with get_db_connection() as conn:
+        conn.execute(
+            text("INSERT INTO expenses (date, amount, category, description, tags) VALUES (:date, :amount, :category, :desc, :tags)"),
+            {"date": date, "amount": amount, "category": category, "desc": desc, "tags": tags}
         )
-    conn.commit()
-    conn.close()
+        conn.commit()
 
 # Generate PDF report with graph
 def generate_report(df):
@@ -215,15 +210,13 @@ st.download_button("Download Expenses as CSV", csv, "expenses.csv", "text/csv")
 uploaded_file = st.file_uploader("Import Expenses from CSV", type="csv")
 if uploaded_file:
     df_upload = pd.read_csv(uploaded_file)
-    conn = get_db_connection()
-    with conn.connection.cursor() as cur:
+    with get_db_connection() as conn:
         for _, row in df_upload.iterrows():
-            cur.execute(
-                "INSERT INTO expenses (date, amount, category, description, tags) VALUES (%s, %s, %s, %s, %s)",
-                (row["date"], row["amount"], row["category"], row["description"], row["tags"])
+            conn.execute(
+                text("INSERT INTO expenses (date, amount, category, description, tags) VALUES (:date, :amount, :category, :desc, :tags)"),
+                {"date": row["date"], "amount": row["amount"], "category": row["category"], "desc": row["description"], "tags": row["tags"]}
             )
-    conn.commit()
-    conn.close()
+        conn.commit()
     st.success("Imported successfully!")
 
 st.subheader("Download Expense Report")
