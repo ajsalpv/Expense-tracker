@@ -7,3 +7,5 @@ speechrecognition
 psycopg2-binary
 reportlab
 matplotlib
+dotenv
+sqlalchemy
